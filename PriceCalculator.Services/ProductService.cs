@@ -6,32 +6,46 @@ using PriceCalculatorApi.Models;
 
 namespace PriceCalculatorApi.Services;
 
-public class ProductService(PriceCalculatorDbContext db)
+public class ProductService(PriceCalculatorDbContext db, IMapper mapper)
 {
     private decimal? _cachesHourlyRate;
-    private readonly IMapper mapper = new MapperConfiguration(x => x.AddProfile<AutoMapperProfile>()).CreateMapper();
+    //private readonly IMapper mapper = new MapperConfiguration(x => x.AddProfile<AutoMapperProfile>()).CreateMapper();
 
-    public async Task<List<ProductListModel>> GetProductLists()
+    public async Task<List<ProductListModel>> GetProductList()
     {
         return await db.Products
             .ProjectTo<ProductListModel>(mapper.ConfigurationProvider)
             .ToListAsync();
     }
-    public async Task<ProductModel?> GetProduct(int id)
+    public async Task<ProductListModel?> GetProduct(int id)
     {
         return await db.Products
             .Where(x => x.ProductID == id)
-            .ProjectTo<ProductModel>(mapper.ConfigurationProvider)
+            .ProjectTo<ProductListModel>(mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
     }
 
-    public async Task<List<ProductListModel>> CreateProduct(ProductListModel product)
+    public async Task<ProductListModel> CreateProduct(ProductEditModel model)
     {
-        var entity = mapper.Map<Product>(product);
+        var entity = mapper.Map<Product>(model);
         db.Products.Add(entity);
         await db.SaveChangesAsync();
+        return await GetProduct(entity.ProductID);
+    }
 
-        return await GetProductLists();
+    public async Task<ProductModel?> GetProductDetails(int id)
+    {
+        var product = await db.Products
+            .Where(pi => pi.ProductID == id)
+            .Include(pi => pi.ProductIngredients)
+            .Include(pl => pl.ProductLabors)
+            .ProjectTo<ProductModel>(mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync();
+
+        if(product == null)
+            return null;
+
+        return product;
     }
 
     public static void CalculateIngredientCost(ProductIngredient productIngredient)

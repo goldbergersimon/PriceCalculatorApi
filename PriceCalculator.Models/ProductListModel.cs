@@ -21,16 +21,27 @@ public class ProductEditModel
     public decimal? Oz { get; set; }
     public decimal? Container { get; set; }
     public int? Pieces { get; set; }
+    public List<ProductIngredientEditModel> Ingredients { get; set; } = [];
+    public List<ProductLaborEditModel> Labors { get; set; } = [];
 }
 
-public class ProductModel : ProductEditModel
+public class ProductModel
 {
     public int ProductID { get; set; }
-    public List<ProductIngredientModel> Ingredients { get; set; } = [];
+    public string Name { get; set; } = null!;
+    public decimal CostPrice { get; set; }
+    public decimal IngredientCost { get; set; }
+    public decimal LaborCost { get; set; }
+    public decimal? Oz { get; set; }
+    public decimal? Container { get; set; }
+    public int? Pieces { get; set; }
+    public List<ProductIngredientEditModel> Ingredients { get; set; } = [];
+    public List<ProductLaborEditModel> Labors { get; set; } = [];
 }
 
 public class ProductIngredientEditModel
 {
+    public int ProductIngredientID { get; set; }
     public int ProductID { get; set; }
     public int IngredientID { get; set; }
     public decimal Quantity { get; set; }
@@ -38,9 +49,19 @@ public class ProductIngredientEditModel
     public decimal TotalCostPerItem { get; set; }
 }
 
-public class ProductIngredientModel: ProductIngredientEditModel
+
+public class ProductLaborEditModel
 {
-    public int ProductIngredientID { get; set; }
+    public int Id { get; set; }
+    public string LaborName { get; set; } = null!;
+    public TimeSpan Duration { get; set; }
+    public int Workers { get; set; }
+    public int Yields { get; set; }
+    public TimeSpan TotalLaborPerItem { get; set; }
+    public decimal TotalLaborCost { get; set; }
+    public int ProductId { get; set; }
 }
+
+
 
 

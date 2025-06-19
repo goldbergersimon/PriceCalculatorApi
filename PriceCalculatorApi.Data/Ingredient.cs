@@ -38,6 +38,5 @@ public class Ingredient
     public int? Oz { get; set; }
     [Column(TypeName = "decimal(6,2)")]
     public decimal? PricePerOz { get; set; }
-    public List<Product> Products { get; set; } = null!;
     public ICollection<ProductIngredient> ProductIngredients { get; set; } = [];
 }

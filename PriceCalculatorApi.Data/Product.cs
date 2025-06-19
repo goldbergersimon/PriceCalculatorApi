@@ -21,10 +21,7 @@ public class Product
     public decimal? Container { get; set; }
     [Range(0, 10000)]
     public int? Pieces { get; set; }
-    public List<Ingredient> Ingredients { get; set; } = [];
     public ICollection<ProductIngredient> ProductIngredients { get; set; } = [];
     public ICollection<ProductLabor> ProductLabors { get; set; } = [];
-
-    public List<Item> Items { get; set; } = [];
     public ICollection<ItemProduct> ItemProducts { get; set; } = [];
 }

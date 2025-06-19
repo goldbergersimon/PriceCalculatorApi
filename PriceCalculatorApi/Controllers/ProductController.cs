@@ -11,17 +11,32 @@ public class ProductController(ProductService productService) : ControllerBase
     [HttpGet]
     public async Task<List<ProductListModel>> GetAllProducts()
     {
-        var pruducts = await productService.GetProductLists();
+        var pruducts = await productService.GetProductList();
         return pruducts;
     }
 
+    //[HttpGet("{id}")]
+    //public async Task<ActionResult<ProductListModel>> GetProduct(int id)
+    //{
+    //    var pruduct = await productService.GetProduct(id);
+    //    if (pruduct == null)
+    //        return NotFound();
+
+    //    return pruduct;
+    //}
+
     [HttpGet("{id}")]
-    public async Task<ActionResult<ProductModel>> GetProduct(int id)
+    public async Task<ActionResult<ProductModel>> GetProductDetails(int id)
     {
-        var pruduct = await productService.GetProduct(id);
-        if (pruduct == null)
+        var product = await productService.GetProductDetails(id);
+
+        if (product == null)
             return NotFound();
 
-        return pruduct;
+        return product;
     }
+
+    [HttpPost]
+    public async Task<ProductListModel> CreateProduct([FromBody] ProductEditModel model) =>
+        await productService.CreateProduct(model);
 }

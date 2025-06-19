@@ -6,9 +6,9 @@ using PriceCalculatorApi.Models;
 
 namespace PriceCalculatorApi.Services;
 
-public class IngredientService(PriceCalculatorDbContext db, ProductService productService)
+public class IngredientService(PriceCalculatorDbContext db, ProductService productService, IMapper mapper)
 {
-    private readonly IMapper mapper = new MapperConfiguration(i => i.AddProfile<AutoMapperProfile>()).CreateMapper();
+    //private readonly IMapper mapper = new MapperConfiguration(i => i.AddProfile<AutoMapperProfile>()).CreateMapper();
 
     public async Task<List<IngredientModel>> GetIngredientList()
     {
@@ -41,7 +41,7 @@ public class IngredientService(PriceCalculatorDbContext db, ProductService produ
 
         mapper.Map(model, ingredient);
 
-        //await RecalculateAffectedProductsAndItems(id);
+        await RecalculateAffectedProductsAndItems(id);
 
         await db.SaveChangesAsync();
 
@@ -80,7 +80,7 @@ public class IngredientService(PriceCalculatorDbContext db, ProductService produ
             .Where(p => p.ProductIngredients.Any(pi => pi.IngredientID == ingredientId))
             .ToListAsync();
 
-        var UpdatedProductIds = new List<int>();
+        var updatedProductIds = new List<int>();
 
         foreach (var product in products)
         {
@@ -113,10 +113,10 @@ public class IngredientService(PriceCalculatorDbContext db, ProductService produ
             product.LaborCost = totalLaborCost;
 
             product.CostPrice = ProductService.CalculateTotalProductCost(totalIngredientCost, totalLaborCost);
-            UpdatedProductIds.Add(product.ProductID);
+            updatedProductIds.Add(product.ProductID);
         }
 
-        await RecalculateAffectedItems(UpdatedProductIds, horlyRate);
+        await RecalculateAffectedItems(updatedProductIds, horlyRate);
     }
 
     public async Task RecalculateAffectedItems(List<int> productIds, decimal horlyRate)

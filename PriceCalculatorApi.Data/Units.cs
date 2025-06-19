@@ -1,5 +1,8 @@
-﻿namespace PriceCalculatorApi.Data;
+﻿using System.Text.Json.Serialization;
 
+namespace PriceCalculatorApi.Data;
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum Units
 {
     None = 0,
