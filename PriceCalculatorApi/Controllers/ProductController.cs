@@ -39,4 +39,7 @@ public class ProductController(ProductService productService) : ControllerBase
     [HttpPost]
     public async Task<ProductListModel> CreateProduct([FromBody] ProductEditModel model) =>
         await productService.CreateProduct(model);
+
+    //[HttpPut("{id}")]
+    //public async Task<>
 }
