@@ -3,13 +3,14 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using PriceCalculatorApi.Data;
 using PriceCalculatorApi.Models;
+using System.Data;
+using System.Threading.Tasks;
 
 namespace PriceCalculatorApi.Services;
 
 public class ProductService(PriceCalculatorDbContext db, IMapper mapper)
 {
     private decimal? _cachesHourlyRate;
-    //private readonly IMapper mapper = new MapperConfiguration(x => x.AddProfile<AutoMapperProfile>()).CreateMapper();
 
     public async Task<List<ProductListModel>> GetProductList()
     {
@@ -33,6 +34,20 @@ public class ProductService(PriceCalculatorDbContext db, IMapper mapper)
         return await GetProduct(entity.ProductID);
     }
 
+    public async Task<ProductListModel?> UpdateProduct(ProductModel model)
+    {
+        var existing = await db.Products
+            .Include(pi => pi.ProductIngredients)
+            .Include(pl => pl.ProductLabors)
+            .FirstOrDefaultAsync(p => p.ProductID == model.ProductID);
+        if (existing == null) return null;
+
+        mapper.Map(model, existing);
+        await db.SaveChangesAsync();
+
+        return mapper.Map<ProductListModel>(existing);
+    }
+
     public async Task<ProductModel?> GetProductDetails(int id)
     {
         var product = await db.Products
@@ -48,12 +63,27 @@ public class ProductService(PriceCalculatorDbContext db, IMapper mapper)
         return product;
     }
 
+    public async Task<bool> DeleteProduct(int id)
+    {
+        var product = await db.Products.FindAsync(id);
+        if (product == null) return false;
+
+        bool hasChild = await db.ItemProducts.AnyAsync(ip => ip.ProductId == id);
+        if (hasChild)
+            throw new InvalidOperationException("This recipe cannot be deleted because it is used in one or more items.");
+
+        db.Products.Remove(product);
+        await db.SaveChangesAsync();
+
+        return true;
+    }
+
     public static void CalculateIngredientCost(ProductIngredient productIngredient)
     {
         if (productIngredient == null || productIngredient.Ingredient == null)
         {
             productIngredient.TotalCostPerItem = 0;
-            return;
+            return ;
         }
 
         productIngredient.TotalCostPerItem = productIngredient.Unit switch
@@ -67,6 +97,26 @@ public class ProductService(PriceCalculatorDbContext db, IMapper mapper)
             Units.Oz => productIngredient.Quantity * productIngredient.Ingredient.PricePerOz!.Value,
             _ => 0
         };
+    }
+
+    public async Task<decimal> calculateIngredientCost(PiModel productIngredient)
+    {
+        var ingredient = await db.Ingredients.FirstOrDefaultAsync(i => i.IngredientID == productIngredient.IngredientID);
+        if (productIngredient == null || ingredient == null)
+            return 0;
+
+        decimal totalCostPerItem = productIngredient.Unit switch
+        {
+            Units.Cups => productIngredient.Quantity * ingredient.PricePerCup!.Value,
+            Units.Tbs => productIngredient.Quantity * ingredient.PricePerTbs!.Value,
+            Units.Tsp => productIngredient.Quantity * ingredient.PricePerTsp!.Value,
+            Units.Pieces => productIngredient.Quantity * ingredient.PricePerPiece!.Value,
+            Units.Containers => productIngredient.Quantity * ingredient.PricePerContainer!.Value,
+            Units.Pounds => productIngredient.Quantity * ingredient.PricePerPound!.Value,
+            Units.Oz => productIngredient.Quantity * ingredient.PricePerOz!.Value,
+            _ => 0
+        };
+        return totalCostPerItem;
     }
 
     public static decimal CalculateTotalIngredientCost(IEnumerable<ProductIngredient> ingredients)
@@ -120,7 +170,6 @@ public class ProductService(PriceCalculatorDbContext db, IMapper mapper)
         if (_cachesHourlyRate.HasValue)
             return _cachesHourlyRate.Value;
 
-        //using DessertPriceDbContext db = new();
         var setting = await db.Settings.FirstOrDefaultAsync(s => s.Key == SettingKeys.HourlyRate);
         if (setting != null && decimal.TryParse(setting.Value, out decimal rate))
         {

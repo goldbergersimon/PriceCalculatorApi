@@ -47,7 +47,7 @@ public class IngredientController(IngredientService ingredientService) : Control
     {
         try
         {
-            var success = await ingredientService.DeleteIngredient(id);
+            bool success = await ingredientService.DeleteIngredient(id);
             if (!success)
                 return NotFound();
 

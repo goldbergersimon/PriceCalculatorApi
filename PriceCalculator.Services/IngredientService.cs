@@ -8,7 +8,6 @@ namespace PriceCalculatorApi.Services;
 
 public class IngredientService(PriceCalculatorDbContext db, ProductService productService, IMapper mapper)
 {
-    //private readonly IMapper mapper = new MapperConfiguration(i => i.AddProfile<AutoMapperProfile>()).CreateMapper();
 
     public async Task<List<IngredientModel>> GetIngredientList()
     {

@@ -6,10 +6,9 @@ using PriceCalculatorApi.Models;
 
 namespace PriceCalculatorApi.Services;
 
-public class ItemService(PriceCalculatorDbContext db)
+public class ItemService(PriceCalculatorDbContext db, IMapper mapper)
 {
     private decimal? _cachesHourlyRate;
-    private readonly IMapper mapper = new MapperConfiguration(x => x.AddProfile<AutoMapperProfile>()).CreateMapper();
 
     public async Task<List<ItemListModel>> GetItemLists()
     {

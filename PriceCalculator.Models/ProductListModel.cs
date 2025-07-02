@@ -62,6 +62,13 @@ public class ProductLaborEditModel
     public int ProductId { get; set; }
 }
 
+public class PiModel
+{
+    public int IngredientID { get; set; }
+    public decimal Quantity { get; set; }
+    public Units Unit { get; set; } 
+}
+
 
 
 

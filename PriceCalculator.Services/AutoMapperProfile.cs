@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using PriceCalculatorApi.Data;
 using PriceCalculatorApi.Models;
-using AutoMapper.Collection;
 using AutoMapper.EquivalencyExpression;
 
 namespace PriceCalculatorApi.Services;
@@ -38,6 +37,10 @@ public class AutoMapperProfile : Profile
         CreateMap<Product, ProductModel>()
             .ForMember(dest => dest.Ingredients, opt => opt.MapFrom(src => src.ProductIngredients))
             .ForMember(dest => dest.Labors, opt => opt.MapFrom(src => src.ProductLabors));
+
+        CreateMap<ProductModel, Product>()
+            .ForMember(dest => dest.ProductIngredients, opt => opt.MapFrom(src => src.Ingredients))
+            .ForMember(dest => dest.ProductLabors, opt => opt.MapFrom(src => src.Labors));
 
 
         CreateMap<ProductEditModel, Product>()
