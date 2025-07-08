@@ -37,4 +37,5 @@ public class Item
 
     public ICollection<ItemProduct> ItemProducts { get; set; } = [];
     public ICollection<ItemLabor> ItemLabors { get; set; } = [];
+    public ICollection<ItemIngredient> ItemIngredients { get; set; } = [];
 }

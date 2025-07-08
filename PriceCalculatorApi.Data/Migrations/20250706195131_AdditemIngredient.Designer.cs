@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PriceCalculatorApi.Data;
 
@@ -11,9 +12,11 @@ using PriceCalculatorApi.Data;
 namespace PriceCalculatorApi.Data.Migrations
 {
     [DbContext(typeof(PriceCalculatorDbContext))]
-    partial class PriceCalculatorDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250706195131_AdditemIngredient")]
+    partial class AdditemIngredient
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,11 +27,11 @@ namespace PriceCalculatorApi.Data.Migrations
 
             modelBuilder.Entity("PriceCalculatorApi.Data.Ingredient", b =>
                 {
-                    b.Property<int>("IngredientId")
+                    b.Property<int>("IngredientID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IngredientId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IngredientID"));
 
                     b.Property<int?>("Containers")
                         .HasColumnType("int");
@@ -80,9 +83,9 @@ namespace PriceCalculatorApi.Data.Migrations
                     b.Property<int?>("Tsp")
                         .HasColumnType("int");
 
-                    b.HasKey("IngredientId");
+                    b.HasKey("IngredientID");
 
-                    b.ToTable("Ingredients", (string)null);
+                    b.ToTable("Ingredients");
                 });
 
             modelBuilder.Entity("PriceCalculatorApi.Data.Item", b =>
@@ -139,7 +142,7 @@ namespace PriceCalculatorApi.Data.Migrations
 
                     b.HasKey("ItemId");
 
-                    b.ToTable("Items", (string)null);
+                    b.ToTable("Items");
                 });
 
             modelBuilder.Entity("PriceCalculatorApi.Data.ItemIngredient", b =>
@@ -150,7 +153,7 @@ namespace PriceCalculatorApi.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ItemIngredientId"));
 
-                    b.Property<int>("IngredientId")
+                    b.Property<int>("IngredientID")
                         .HasColumnType("int");
 
                     b.Property<int>("ItemId")
@@ -171,11 +174,11 @@ namespace PriceCalculatorApi.Data.Migrations
 
                     b.HasKey("ItemIngredientId");
 
-                    b.HasIndex("IngredientId");
+                    b.HasIndex("IngredientID");
 
                     b.HasIndex("ItemId");
 
-                    b.ToTable("ItemIngredients", (string)null);
+                    b.ToTable("ItemIngredients");
                 });
 
             modelBuilder.Entity("PriceCalculatorApi.Data.ItemLabor", b =>
@@ -213,7 +216,7 @@ namespace PriceCalculatorApi.Data.Migrations
 
                     b.HasIndex("ItemId");
 
-                    b.ToTable("ItemLabors", (string)null);
+                    b.ToTable("ItemLabors");
                 });
 
             modelBuilder.Entity("PriceCalculatorApi.Data.ItemProduct", b =>
@@ -249,16 +252,16 @@ namespace PriceCalculatorApi.Data.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ItemProducts", (string)null);
+                    b.ToTable("ItemProducts");
                 });
 
             modelBuilder.Entity("PriceCalculatorApi.Data.Product", b =>
                 {
-                    b.Property<int>("ProductId")
+                    b.Property<int>("ProductID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductID"));
 
                     b.Property<decimal?>("Container")
                         .HasColumnType("decimal(6,2)");
@@ -283,23 +286,23 @@ namespace PriceCalculatorApi.Data.Migrations
                     b.Property<int?>("Pieces")
                         .HasColumnType("int");
 
-                    b.HasKey("ProductId");
+                    b.HasKey("ProductID");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("PriceCalculatorApi.Data.ProductIngredient", b =>
                 {
-                    b.Property<int>("ProductIngredientId")
+                    b.Property<int>("ProductIngredientID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductIngredientId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductIngredientID"));
 
-                    b.Property<int>("IngredientId")
+                    b.Property<int>("IngredientID")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProductId")
+                    b.Property<int>("ProductID")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Quantity")
@@ -312,13 +315,13 @@ namespace PriceCalculatorApi.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(40)");
 
-                    b.HasKey("ProductIngredientId");
+                    b.HasKey("ProductIngredientID");
 
-                    b.HasIndex("IngredientId");
+                    b.HasIndex("IngredientID");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ProductID");
 
-                    b.ToTable("ProductIngredients", (string)null);
+                    b.ToTable("ProductIngredients");
                 });
 
             modelBuilder.Entity("PriceCalculatorApi.Data.ProductLabor", b =>
@@ -356,7 +359,7 @@ namespace PriceCalculatorApi.Data.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductLabors", (string)null);
+                    b.ToTable("ProductLabors");
                 });
 
             modelBuilder.Entity("PriceCalculatorApi.Data.Settings", b =>
@@ -371,14 +374,14 @@ namespace PriceCalculatorApi.Data.Migrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("Settings", (string)null);
+                    b.ToTable("Settings");
                 });
 
             modelBuilder.Entity("PriceCalculatorApi.Data.ItemIngredient", b =>
                 {
                     b.HasOne("PriceCalculatorApi.Data.Ingredient", "Ingredient")
                         .WithMany()
-                        .HasForeignKey("IngredientId")
+                        .HasForeignKey("IngredientID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -427,13 +430,13 @@ namespace PriceCalculatorApi.Data.Migrations
                 {
                     b.HasOne("PriceCalculatorApi.Data.Ingredient", "Ingredient")
                         .WithMany("ProductIngredients")
-                        .HasForeignKey("IngredientId")
+                        .HasForeignKey("IngredientID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("PriceCalculatorApi.Data.Product", "Product")
                         .WithMany("ProductIngredients")
-                        .HasForeignKey("ProductId")
+                        .HasForeignKey("ProductID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

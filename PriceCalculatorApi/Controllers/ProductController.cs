@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PriceCalculatorApi.Data;
 using PriceCalculatorApi.Models;
 using PriceCalculatorApi.Services;
-using System.Threading.Tasks;
 
 namespace PriceCalculatorApi.Controllers;
 
@@ -45,7 +43,7 @@ public class ProductController(ProductService productService) : ControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult<ProductListModel>> UpdateProduct(int id, [FromBody] ProductModel model)
     {
-        if (id != model.ProductID) return BadRequest();
+        if (id != model.ProductId) return BadRequest();
 
         try
         {
@@ -84,4 +82,25 @@ public class ProductController(ProductService productService) : ControllerBase
 
         return result;
     }
+
+    [HttpPost("calculate-labor")]
+    public TimeSpan CalculateLabor([FromBody] PlModel model)
+    {
+        TimeSpan total = productService.CalculateTotaltime(model);
+        return total;
+    }
+
+    [HttpPost("calculate-total-ingredient-cost")]
+    public decimal CalculateTotalIngredientCost([FromBody] List<decimal> totals)
+    {
+        return totals.Sum();
+    }
+
+    [HttpPost("calculate-total-labor-cost")]
+    public async Task<decimal> CalculateTotalLaborCost([FromBody] List<TlModel> models)
+    {
+        decimal total = await productService.CalculateTotalLaborCost(models);
+        return total;
+    }
+
 }

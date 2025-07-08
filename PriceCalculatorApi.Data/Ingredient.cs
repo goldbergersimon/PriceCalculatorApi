@@ -5,7 +5,7 @@ namespace PriceCalculatorApi.Data;
 
 public class Ingredient
 {
-    public int IngredientID { get; set; }
+    public int IngredientId { get; set; }
     [MaxLength(100)]
     public string Name { get; set; } = null!;
     [Column(TypeName = "decimal(6,2)")]

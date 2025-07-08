@@ -1,19 +1,23 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PriceCalculatorApi.Data;
 
-public class ProductIngredient
+public class ItemIngredient
 {
-    public int ProductIngredientId { get; set; }
-    public int ProductId { get; set; }
+    public int ItemIngredientId { get; set; }
+
+    public int ItemId { get; set; }
     public int IngredientId { get; set; }
     [Column(TypeName = "decimal(6,2)")]
     public decimal Quantity { get; set; }
     [Column(TypeName = "nvarchar(40)")]
     public Units Unit { get; set; }
+    [Range(0, 100)]
+    public int Yields { get; set; }
     [Column(TypeName = "decimal(6,2)")]
     public decimal TotalCostPerItem { get; set; }
 
-    public Product Product { get; set; } = null!;
+    public Item Item { get; set; } = null!;
     public Ingredient Ingredient { get; set; } = null!;
 }

@@ -32,7 +32,7 @@ public class IngredientController(IngredientService ingredientService) : Control
     [HttpPut("{id}")]
     public async Task<ActionResult<IngredientModel>> UpdateIngredient(int id, [FromBody] IngredientModel model)
     {
-        if (id != model.IngredientID)
+        if (id != model.IngredientId)
             return BadRequest("Id mismatch");
 
         var updated = await ingredientService.UpdateIngredient(id, model);

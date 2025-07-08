@@ -11,5 +11,6 @@ public class PriceCalculatorDbContext(DbContextOptions<PriceCalculatorDbContext>
     public DbSet<Item> Items { get; set; } = null!;
     public DbSet<ItemProduct> ItemProducts { get; set; } = null!;
     public DbSet<ItemLabor> ItemLabors { get; set; } = null!;
+    public DbSet<ItemIngredient> ItemIngredients { get; set; } = null!;
     public DbSet<Settings> Settings { get; set; } = null!;
 }

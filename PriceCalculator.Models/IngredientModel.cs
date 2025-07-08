@@ -2,7 +2,7 @@
 
 public class IngredientModel : IngredientEditModel
 {
-    public int IngredientID { get; set; }
+    public int IngredientId { get; set; }
 
 }
 

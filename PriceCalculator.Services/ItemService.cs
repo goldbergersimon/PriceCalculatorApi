@@ -16,20 +16,81 @@ public class ItemService(PriceCalculatorDbContext db, IMapper mapper)
             .ProjectTo<ItemListModel>(mapper.ConfigurationProvider)
             .ToListAsync();
     }
-    public async Task<ItemModel?> GetItem(int id)
+    public async Task<ItemListModel?> GetItem(int id)
     {
         return await db.Items
             .Where(x => x.ItemId == id)
-            .ProjectTo<ItemModel>(mapper.ConfigurationProvider)
+            .ProjectTo<ItemListModel>(mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
     }
-    public async Task<List<ItemListModel>> CreateItem(ItemListModel item)
+
+    public async Task<ItemModel?> GetItemDetails(int id)
     {
-        var entity = mapper.Map<Item>(item);
-        db.Items.Add(entity);
+        var item = await db.Items
+            .Where(i => i.ItemId == id)
+            .Include(ip => ip.ItemProducts)
+            .Include(il => il.ItemLabors)
+            .Include(ii => ii.ItemIngredients)
+            .ProjectTo<ItemModel>(mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync();
+
+        if (item == null)
+            return null;
+
+        return item;
+    }
+    public async Task<ItemListModel> CreateItem(ItemEditModel model)
+    {
+        var entity = mapper.Map<Item>(model);
+        await db.Items.AddAsync(entity);
+        await db.SaveChangesAsync();
+        return await GetItem(entity.ItemId);
+    }
+
+    public async Task<ItemListModel?> UpdateItem(ItemModel model)
+    {
+        var existing = await db.Items
+            .Include(ip => ip.ItemProducts)
+            .Include(il => il.ItemLabors)
+            .Include(ii => ii.ItemIngredients)
+            .FirstOrDefaultAsync(p => p.ItemId == model.ItemId);
+        if (existing == null) return null;
+
+        mapper.Map(model, existing);
         await db.SaveChangesAsync();
 
-        return await GetItemLists();
+        return mapper.Map<ItemListModel>(existing);
+    }
+
+    public async Task<bool> DeleteItem(int id)
+    {
+        var item = await db.Items.FindAsync(id);
+        if (item == null) return false;
+
+        db.Items.Remove(item);
+        await db.SaveChangesAsync();
+
+        return true;
+    }
+
+    public async Task<decimal> calculateIngredientCost(IiModel itemIngredient)
+    {
+        var ingredient = await db.Ingredients.FirstOrDefaultAsync(i => i.IngredientId == itemIngredient.IngredientId);
+        if (itemIngredient == null || ingredient == null)
+            return 0;
+
+        decimal totalCostPerItem = itemIngredient.Unit switch
+        {
+            Units.Cups => itemIngredient.Quantity * ingredient.PricePerCup!.Value / itemIngredient.Yields,
+            Units.Tbs => itemIngredient.Quantity * ingredient.PricePerTbs!.Value / itemIngredient.Yields,
+            Units.Tsp => itemIngredient.Quantity * ingredient.PricePerTsp!.Value / itemIngredient.Yields,
+            Units.Pieces => itemIngredient.Quantity * ingredient.PricePerPiece!.Value / itemIngredient.Yields,
+            Units.Containers => itemIngredient.Quantity * ingredient.PricePerContainer!.Value / itemIngredient.Yields,
+            Units.Pounds => itemIngredient.Quantity * ingredient.PricePerPound!.Value / itemIngredient.Yields,
+            Units.Oz => itemIngredient.Quantity * ingredient.PricePerOz!.Value / itemIngredient.Yields,
+            _ => 0
+        };
+        return totalCostPerItem;
     }
     public static void CalculateProductCost(ItemProduct itemProduct)
     {
@@ -48,7 +109,7 @@ public class ItemService(PriceCalculatorDbContext db, IMapper mapper)
 
         itemProduct.Total = itemProduct.Unit switch
         {
-            ItemUnits.Container => itemProduct.Quantity * itemProduct.Product.CostPrice / GetSafeValue(itemProduct.Product.Container) / itemProduct.Yields,
+            ItemUnits.Containers => itemProduct.Quantity * itemProduct.Product.CostPrice / GetSafeValue(itemProduct.Product.Container) / itemProduct.Yields,
             ItemUnits.Oz => itemProduct.Quantity * itemProduct.Product.CostPrice / GetSafeValue(itemProduct.Product.Oz) / itemProduct.Yields,
             ItemUnits.Pieces => itemProduct.Quantity * itemProduct.Product.CostPrice / GetSafeValue(itemProduct.Product.Pieces) / itemProduct.Yields,
             _ => 0

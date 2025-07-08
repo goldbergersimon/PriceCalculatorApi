@@ -1,4 +1,6 @@
-﻿namespace PriceCalculatorApi.Models;
+﻿using PriceCalculatorApi.Data;
+
+namespace PriceCalculatorApi.Models;
 
 public class ItemListModel
 {
@@ -10,7 +12,7 @@ public class ItemListModel
     public decimal OwnPrice { get; set; }
 }
 
-public class ItemModel : ItemEditModel
+public class ItemModel: ItemEditModel
 {
     public int ItemId { get; set; }
 }
@@ -30,5 +32,52 @@ public class ItemEditModel
     public decimal WholesaleMargin { get; set; }
     public decimal OwnMargin { get; set; }
     public decimal OfficeExpenses { get; set; }
+
+    public List<ItemProductModel> Products { get; set; } = [];
+    public List<ItemLaborModel> Labors { get; set; } = [];
+    public List<ItemIngredientModel> Ingredients { get; set; } = [];
+}
+
+public class ItemProductModel
+{
+    public int ItemProductId { get; set; }
+    public int ProductId { get; set; }
+    public int ItemId { get; set; }
+    public decimal Quantity { get; set; }
+    public ItemUnits Unit { get; set; }
+    public int Yields { get; set; }
+    public decimal Total { get; set; }
+}
+
+public class ItemLaborModel
+{
+    public int ItemLaborId { get; set; }
+    public string LaborName { get; set; } = null!;
+    public TimeSpan Duration { get; set; }
+    public int Workers { get; set; }
+    public int Yields { get; set; }
+    public TimeSpan TotalLaborPerItem { get; set; }
+    public decimal TotalLaborCost { get; set; }
+    public int ItemId { get; set; }
+}
+
+public class ItemIngredientModel
+{
+    public int ItemIngredientId { get; set; }
+
+    public int ItemId { get; set; }
+    public int IngredientId { get; set; }
+    public decimal Quantity { get; set; }
+    public Units Unit { get; set; }
+    public int Yields { get; set; }
+    public decimal TotalCostPerItem { get; set; }
+}
+
+public class IiModel
+{
+    public int IngredientId { get; set; }
+    public decimal Quantity { get; set; }
+    public Units Unit { get; set; }
+    public int Yields { get; set; }
 }
 

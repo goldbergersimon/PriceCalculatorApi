@@ -2,26 +2,68 @@
 using PriceCalculatorApi.Models;
 using PriceCalculatorApi.Services;
 
-namespace PriceCalculatorApi.Controllers
-{
-    [Route("api/[controller]")]
-    [ApiController]
-    public class ItemController(ItemService itemService) : ControllerBase
-    {
-        [HttpGet]
-        public async Task<ActionResult<ItemListModel>> GetAllItems()
-        {
-            var items = await itemService.GetItemLists();
-            return Ok(items);
-        }
+namespace PriceCalculatorApi.Controllers;
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ItemModel>> GetItem(int id)
+[Route("api/[controller]")]
+[ApiController]
+public class ItemController(ItemService itemService) : ControllerBase
+{
+    [HttpGet]
+    public async Task<List<ItemListModel>> GetAllItems()
+    {
+        var items = await itemService.GetItemLists();
+        return items;
+    }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<ItemModel>> GetItemDetails(int id)
+    {
+        var item = await itemService.GetItemDetails(id);
+
+        if (item == null)
+            return NotFound();
+
+        return item;
+    }
+
+
+    [HttpPost]
+    public async Task<ItemListModel> CreateItem([FromBody] ItemEditModel model) =>
+        await itemService.CreateItem(model);
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult<ItemListModel>> UpdateProduct(int id, [FromBody] ItemModel model)
+    {
+        if (id != model.ItemId) return BadRequest();
+
+        try
         {
-            var items = await itemService.GetItem(id);
-            if (items == null) 
+            var updated = await itemService.UpdateItem(model);
+            if (updated == null)
                 return NotFound();
-            return items;
+            return Ok(updated);
         }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteItem(int id)
+    {
+        bool success = await itemService.DeleteItem(id);
+        if (!success)
+            return NotFound();
+
+        return NoContent();
+    }
+
+    [HttpPost("calculate-ingredient")]
+    public async Task<decimal> CalculateIngredient([FromBody] IiModel model)
+    {
+        decimal result = await itemService.calculateIngredientCost(model);
+
+        return result;
     }
 }

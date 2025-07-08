@@ -19,7 +19,7 @@ public class IngredientService(PriceCalculatorDbContext db, ProductService produ
     public async Task<IngredientModel?> GetIngredient(int id)
     {
         return await db.Ingredients
-            .Where(x => x.IngredientID == id)
+            .Where(x => x.IngredientId == id)
             .ProjectTo<IngredientModel>(mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
     }
@@ -29,7 +29,7 @@ public class IngredientService(PriceCalculatorDbContext db, ProductService produ
         var entity = mapper.Map<Ingredient>(model);
         db.Ingredients.Add(entity);
         await db.SaveChangesAsync();
-        return await GetIngredient(entity.IngredientID);
+        return await GetIngredient(entity.IngredientId);
     }
 
     public async Task<IngredientModel?> UpdateIngredient(int id, IngredientModel model)
@@ -53,7 +53,7 @@ public class IngredientService(PriceCalculatorDbContext db, ProductService produ
         if (ingredient == null)
             return false;
 
-        var hasChild = await db.ProductIngredients.AnyAsync(pi => pi.IngredientID == id);
+        var hasChild = await db.ProductIngredients.AnyAsync(pi => pi.IngredientId == id);
 
         if (hasChild)
             throw new InvalidOperationException("This ingredient cannot be deleted because it is used in one or more products.");
@@ -76,7 +76,7 @@ public class IngredientService(PriceCalculatorDbContext db, ProductService produ
             .Include(pi => pi.ProductIngredients)
             .ThenInclude(i => i.Ingredient)
             .Include(pl => pl.ProductLabors)
-            .Where(p => p.ProductIngredients.Any(pi => pi.IngredientID == ingredientId))
+            .Where(p => p.ProductIngredients.Any(pi => pi.IngredientId == ingredientId))
             .ToListAsync();
 
         var updatedProductIds = new List<int>();
@@ -112,7 +112,7 @@ public class IngredientService(PriceCalculatorDbContext db, ProductService produ
             product.LaborCost = totalLaborCost;
 
             product.CostPrice = ProductService.CalculateTotalProductCost(totalIngredientCost, totalLaborCost);
-            updatedProductIds.Add(product.ProductID);
+            updatedProductIds.Add(product.ProductId);
         }
 
         await RecalculateAffectedItems(updatedProductIds, horlyRate);

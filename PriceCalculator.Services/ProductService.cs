@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using PriceCalculatorApi.Data;
 using PriceCalculatorApi.Models;
 using System.Data;
-using System.Threading.Tasks;
 
 namespace PriceCalculatorApi.Services;
 
@@ -21,37 +20,14 @@ public class ProductService(PriceCalculatorDbContext db, IMapper mapper)
     public async Task<ProductListModel?> GetProduct(int id)
     {
         return await db.Products
-            .Where(x => x.ProductID == id)
+            .Where(x => x.ProductId == id)
             .ProjectTo<ProductListModel>(mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
     }
-
-    public async Task<ProductListModel> CreateProduct(ProductEditModel model)
-    {
-        var entity = mapper.Map<Product>(model);
-        db.Products.Add(entity);
-        await db.SaveChangesAsync();
-        return await GetProduct(entity.ProductID);
-    }
-
-    public async Task<ProductListModel?> UpdateProduct(ProductModel model)
-    {
-        var existing = await db.Products
-            .Include(pi => pi.ProductIngredients)
-            .Include(pl => pl.ProductLabors)
-            .FirstOrDefaultAsync(p => p.ProductID == model.ProductID);
-        if (existing == null) return null;
-
-        mapper.Map(model, existing);
-        await db.SaveChangesAsync();
-
-        return mapper.Map<ProductListModel>(existing);
-    }
-
     public async Task<ProductModel?> GetProductDetails(int id)
     {
         var product = await db.Products
-            .Where(pi => pi.ProductID == id)
+            .Where(pi => pi.ProductId == id)
             .Include(pi => pi.ProductIngredients)
             .Include(pl => pl.ProductLabors)
             .ProjectTo<ProductModel>(mapper.ConfigurationProvider)
@@ -62,6 +38,29 @@ public class ProductService(PriceCalculatorDbContext db, IMapper mapper)
 
         return product;
     }
+
+    public async Task<ProductListModel> CreateProduct(ProductEditModel model)
+    {
+        var entity = mapper.Map<Product>(model);
+        await db.Products.AddAsync(entity);
+        await db.SaveChangesAsync();
+        return await GetProduct(entity.ProductId);
+    }
+
+    public async Task<ProductListModel?> UpdateProduct(ProductModel model)
+    {
+        var existing = await db.Products
+            .Include(pi => pi.ProductIngredients)
+            .Include(pl => pl.ProductLabors)
+            .FirstOrDefaultAsync(p => p.ProductId == model.ProductId);
+        if (existing == null) return null;
+
+        mapper.Map(model, existing);
+        await db.SaveChangesAsync();
+
+        return mapper.Map<ProductListModel>(existing);
+    }
+
 
     public async Task<bool> DeleteProduct(int id)
     {
@@ -101,7 +100,7 @@ public class ProductService(PriceCalculatorDbContext db, IMapper mapper)
 
     public async Task<decimal> calculateIngredientCost(PiModel productIngredient)
     {
-        var ingredient = await db.Ingredients.FirstOrDefaultAsync(i => i.IngredientID == productIngredient.IngredientID);
+        var ingredient = await db.Ingredients.FirstOrDefaultAsync(i => i.IngredientId == productIngredient.IngredientId);
         if (productIngredient == null || ingredient == null)
             return 0;
 
@@ -117,6 +116,17 @@ public class ProductService(PriceCalculatorDbContext db, IMapper mapper)
             _ => 0
         };
         return totalCostPerItem;
+    }
+    public TimeSpan CalculateTotaltime(PlModel labor)
+    {
+        if (labor.Yields > 0)
+        {
+            return TimeSpan.FromTicks(labor.Duration.Ticks / labor.Yields);
+        }
+        else
+        {
+            return TimeSpan.Zero;
+        }
     }
 
     public static decimal CalculateTotalIngredientCost(IEnumerable<ProductIngredient> ingredients)
@@ -150,8 +160,9 @@ public class ProductService(PriceCalculatorDbContext db, IMapper mapper)
         }
     }
 
-    public static decimal CalculateTotalLaborCost(IEnumerable<ProductLabor> labors, decimal hourlyRate)
+    public async Task<decimal> CalculateTotalLaborCost(IEnumerable<TlModel> labors)
     {
+        decimal hourlyRate = await GetHourlyRate();
         decimal totalLaborCost = 0;
         foreach (var labor in labors)
         {

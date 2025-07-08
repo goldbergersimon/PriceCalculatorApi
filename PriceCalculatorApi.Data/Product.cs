@@ -5,7 +5,7 @@ namespace PriceCalculatorApi.Data;
 
 public class Product
 {
-    public int ProductID { get; set; }
+    public int ProductId { get; set; }
 
     [MaxLength(100)]
     public string Name { get; set; } = null!;
