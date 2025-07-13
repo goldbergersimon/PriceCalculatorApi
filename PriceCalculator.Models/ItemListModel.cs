@@ -81,3 +81,35 @@ public class IiModel
     public int Yields { get; set; }
 }
 
+public class IpModel
+{
+    public int ProductId { get; set; }
+    public decimal Quantity { get; set; }
+    public ItemUnits Unit { get; set; }
+    public int Yields { get; set; }
+}
+
+public class MarginInput
+{
+    public decimal Margin { get; set; }
+    public decimal Cost { get; set; }
+}
+
+public class Sp
+{
+    public decimal Selling { get; set; }
+    public decimal Profit { get; set; }
+}
+
+public class SellingInput
+{
+    public decimal Selling { get; set; }
+    public decimal Cost { get; set; }
+}
+
+public class Pm
+{
+    public decimal Margin { get; set; }
+    public decimal Profit { get; set; }
+}
+

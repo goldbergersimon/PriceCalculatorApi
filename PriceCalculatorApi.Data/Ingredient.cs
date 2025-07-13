@@ -26,10 +26,7 @@ public class Ingredient
     public int? Pieces { get; set; }
     [Column(TypeName = "decimal(6,2)")]
     public decimal? PricePerPiece { get; set; }
-    [Range(0, 10000)]
-    public int? Containers { get; set; }
-    [Column(TypeName = "decimal(6,2)")]
-    public decimal? PricePerContainer { get; set; }
+
     [Column(TypeName = "decimal(6,2)")]
     public decimal? Pounds { get; set; }
     [Column(TypeName = "decimal(6,2)")]

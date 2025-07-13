@@ -18,8 +18,6 @@ public class IngredientEditModel
     public decimal PricePerTsp { get; set; }
     public int Pieces { get; set; }
     public decimal PricePerPiece { get; set; }
-    public int Containers { get; set; }
-    public decimal PricePerContainer { get; set; }
     public decimal Pounds { get; set; }
     public decimal PricePerPound { get; set; }
     public int Oz { get; set; }

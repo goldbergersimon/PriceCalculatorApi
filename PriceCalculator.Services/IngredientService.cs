@@ -157,15 +157,15 @@ public class IngredientService(PriceCalculatorDbContext db, ProductService produ
             item.LaborCost = totalLaborCost;
             item.CostPrice = ItemService.CalculateTotalItemCost(totalMaterialCost, totalLaborCost, item.OfficeExpenses);
 
-            var (retailSelling, retailProfit) = ItemService.CalculateSellingAndProfit(item.CostPrice, item.OfficeExpenses, item.RetailMargin);
+            var (retailSelling, retailProfit) = ItemService.CalculateSellingAndProfit(item.CostPrice, item.RetailMargin);
             item.RetailPrice = retailSelling;
             item.RetailProfit = retailProfit;
 
-            var (wholSelling, wholProfit) = ItemService.CalculateSellingAndProfit(item.CostPrice, item.OfficeExpenses, item.WholesaleMargin);
+            var (wholSelling, wholProfit) = ItemService.CalculateSellingAndProfit(item.CostPrice, item.WholesaleMargin);
             item.WholesalePrice = wholSelling;
             item.WholesaleProfit = wholProfit;
 
-            var (ownMargin, ownProfit) = ItemService.CalculateMarginAndProfit(item.CostPrice, item.OfficeExpenses, item.OwnPrice);
+            var (ownMargin, ownProfit) = ItemService.CalculateMarginAndProfit(item.CostPrice, item.OwnPrice);
             item.OwnMargin = ownMargin;
             item.OwnProfit = ownProfit;
         }

@@ -39,7 +39,7 @@ public class ItemService(PriceCalculatorDbContext db, IMapper mapper)
 
         return item;
     }
-    public async Task<ItemListModel> CreateItem(ItemEditModel model)
+    public async Task<ItemListModel?> CreateItem(ItemEditModel model)
     {
         var entity = mapper.Map<Item>(model);
         await db.Items.AddAsync(entity);
@@ -85,12 +85,30 @@ public class ItemService(PriceCalculatorDbContext db, IMapper mapper)
             Units.Tbs => itemIngredient.Quantity * ingredient.PricePerTbs!.Value / itemIngredient.Yields,
             Units.Tsp => itemIngredient.Quantity * ingredient.PricePerTsp!.Value / itemIngredient.Yields,
             Units.Pieces => itemIngredient.Quantity * ingredient.PricePerPiece!.Value / itemIngredient.Yields,
-            Units.Containers => itemIngredient.Quantity * ingredient.PricePerContainer!.Value / itemIngredient.Yields,
             Units.Pounds => itemIngredient.Quantity * ingredient.PricePerPound!.Value / itemIngredient.Yields,
             Units.Oz => itemIngredient.Quantity * ingredient.PricePerOz!.Value / itemIngredient.Yields,
             _ => 0
         };
         return totalCostPerItem;
+    }
+
+    public async Task<decimal> CalculateProduct(IpModel model)
+    {
+        var product = await db.Products.FirstOrDefaultAsync(p => p.ProductId == model.ProductId);
+        if (model == null || product == null)
+            return 0;
+        if (model.Yields == 0) return 0;
+
+        decimal GetSafeValue(decimal? value) => value ?? 0;
+
+        decimal totalcostPerItem = model.Unit switch
+        {
+            ItemUnits.Containers => model.Quantity * product.CostPrice / GetSafeValue(product.Container) / model.Yields,
+            ItemUnits.Oz => model.Quantity * product.CostPrice / GetSafeValue(product.Oz) / model.Yields,
+            ItemUnits.Pieces => model.Quantity * product.CostPrice / GetSafeValue(product.Pieces) / model.Yields,
+            _ => 0
+        };
+        return totalcostPerItem;
     }
     public static void CalculateProductCost(ItemProduct itemProduct)
     {
@@ -112,6 +130,30 @@ public class ItemService(PriceCalculatorDbContext db, IMapper mapper)
             ItemUnits.Containers => itemProduct.Quantity * itemProduct.Product.CostPrice / GetSafeValue(itemProduct.Product.Container) / itemProduct.Yields,
             ItemUnits.Oz => itemProduct.Quantity * itemProduct.Product.CostPrice / GetSafeValue(itemProduct.Product.Oz) / itemProduct.Yields,
             ItemUnits.Pieces => itemProduct.Quantity * itemProduct.Product.CostPrice / GetSafeValue(itemProduct.Product.Pieces) / itemProduct.Yields,
+            _ => 0
+        };
+    }
+    public void CalculateIngredientCost(ItemIngredient itemIngredient)
+    {
+        if (itemIngredient == null || itemIngredient.Ingredient == null)
+        {
+            itemIngredient.TotalCostPerItem = 0;
+            return;
+        }
+        if (itemIngredient.Yields <= 0)
+        {
+            itemIngredient.TotalCostPerItem = 0;
+            return;
+        }
+
+        itemIngredient.TotalCostPerItem = itemIngredient.Unit switch
+        {
+            Units.Cups => itemIngredient.Quantity * itemIngredient.Ingredient.PricePerCup!.Value / itemIngredient.Yields,
+            Units.Tbs => itemIngredient.Quantity * itemIngredient.Ingredient.PricePerTbs!.Value / itemIngredient.Yields,
+            Units.Tsp => itemIngredient.Quantity * itemIngredient.Ingredient.PricePerTsp!.Value / itemIngredient.Yields,
+            Units.Pieces => itemIngredient.Quantity * itemIngredient.Ingredient.PricePerPiece!.Value / itemIngredient.Yields,
+            Units.Pounds => itemIngredient.Quantity * itemIngredient.Ingredient.PricePerPound!.Value / itemIngredient.Yields,
+            Units.Oz => itemIngredient.Quantity * itemIngredient.Ingredient.PricePerOz!.Value / itemIngredient.Yields,
             _ => 0
         };
     }
@@ -163,17 +205,17 @@ public class ItemService(PriceCalculatorDbContext db, IMapper mapper)
         return materialCost + laborCost + officecost;
     }
 
-    public static (decimal Selling, decimal Profit) CalculateSellingAndProfit(decimal cost, decimal officeCost, decimal margin)
+    public static (decimal Selling, decimal Profit) CalculateSellingAndProfit(decimal cost, decimal margin)
     {
-        decimal totalCost = cost + officeCost;
+        decimal totalCost = cost;
         decimal sellingPrice = totalCost * (1 + margin / 100m);
         decimal profit = sellingPrice - totalCost;
         return (sellingPrice, profit);
     }
 
-    public static (decimal Profit, decimal Margin) CalculateMarginAndProfit(decimal cost, decimal officeCost, decimal selling)
+    public static (decimal Profit, decimal Margin) CalculateMarginAndProfit(decimal cost, decimal selling)
     {
-        decimal totalCost = cost + officeCost;
+        decimal totalCost = cost ;
         decimal profit = selling - totalCost;
         decimal margin = totalCost == 0 ? 0 : (profit / totalCost) * 100m;
         return (profit, margin);
@@ -184,7 +226,6 @@ public class ItemService(PriceCalculatorDbContext db, IMapper mapper)
         if (_cachesHourlyRate.HasValue)
             return _cachesHourlyRate.Value;
 
-        //using DessertPriceDbContext db = new();
         var setting = await db.Settings.FirstOrDefaultAsync(s => s.Key == SettingKeys.HourlyRate);
         if (setting != null && decimal.TryParse(setting.Value, out decimal rate))
         {

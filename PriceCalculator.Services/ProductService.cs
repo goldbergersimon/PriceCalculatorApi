@@ -7,7 +7,7 @@ using System.Data;
 
 namespace PriceCalculatorApi.Services;
 
-public class ProductService(PriceCalculatorDbContext db, IMapper mapper)
+public class ProductService(PriceCalculatorDbContext db, IMapper mapper, ItemService itemService)
 {
     private decimal? _cachesHourlyRate;
 
@@ -56,6 +56,9 @@ public class ProductService(PriceCalculatorDbContext db, IMapper mapper)
         if (existing == null) return null;
 
         mapper.Map(model, existing);
+
+        await RecalculateAffectedItems(model.ProductId);
+
         await db.SaveChangesAsync();
 
         return mapper.Map<ProductListModel>(existing);
@@ -91,7 +94,6 @@ public class ProductService(PriceCalculatorDbContext db, IMapper mapper)
             Units.Tbs => productIngredient.Quantity * productIngredient.Ingredient.PricePerTbs!.Value,
             Units.Tsp => productIngredient.Quantity * productIngredient.Ingredient.PricePerTsp!.Value,
             Units.Pieces => productIngredient.Quantity * productIngredient.Ingredient.PricePerPiece!.Value,
-            Units.Containers => productIngredient.Quantity * productIngredient.Ingredient.PricePerContainer!.Value,
             Units.Pounds => productIngredient.Quantity * productIngredient.Ingredient.PricePerPound!.Value,
             Units.Oz => productIngredient.Quantity * productIngredient.Ingredient.PricePerOz!.Value,
             _ => 0
@@ -110,7 +112,6 @@ public class ProductService(PriceCalculatorDbContext db, IMapper mapper)
             Units.Tbs => productIngredient.Quantity * ingredient.PricePerTbs!.Value,
             Units.Tsp => productIngredient.Quantity * ingredient.PricePerTsp!.Value,
             Units.Pieces => productIngredient.Quantity * ingredient.PricePerPiece!.Value,
-            Units.Containers => productIngredient.Quantity * ingredient.PricePerContainer!.Value,
             Units.Pounds => productIngredient.Quantity * ingredient.PricePerPound!.Value,
             Units.Oz => productIngredient.Quantity * ingredient.PricePerOz!.Value,
             _ => 0
@@ -190,4 +191,70 @@ public class ProductService(PriceCalculatorDbContext db, IMapper mapper)
         _cachesHourlyRate = 0;
         return 0;
     }
+
+     public async Task RecalculateAffectedItems(int id)
+     {
+        if (id == 0) return;
+
+        var hourlyRate = await GetHourlyRate();
+
+        var items = await db.Items
+            .Include(ip => ip.ItemProducts)
+            .ThenInclude(p => p.Product)
+            .Include(ii => ii.ItemIngredients)
+            .ThenInclude(i => i.Ingredient)
+            .Include(pl => pl.ItemLabors)
+            .Where(i => i.ItemProducts.Any(ip => ip.ProductId == id))
+            .ToListAsync();
+
+        foreach (var item in items)
+        {
+            decimal totalMaterialCost = 0;
+            foreach (var ip in item.ItemProducts)
+            {
+                ItemService.CalculateProductCost(ip);
+                totalMaterialCost += ip.Total;
+            }
+            foreach (var ii in item.ItemIngredients)
+            {
+                itemService.CalculateIngredientCost(ii);
+                totalMaterialCost += ii.TotalCostPerItem;
+            }
+
+            decimal totalLaborCost = 0;
+            foreach (var labor in item.ItemLabors)
+            {
+                if (labor.Yields > 0)
+                {
+                    TimeSpan timePerItem = labor.Duration / labor.Yields;
+                    timePerItem = new(timePerItem.Hours, timePerItem.Minutes, timePerItem.Seconds);
+                    labor.TotalLaborPerItem = timePerItem;
+
+                    decimal laborcost = (decimal)timePerItem.TotalHours * hourlyRate * labor.Workers;
+                    totalLaborCost += laborcost;
+                }
+                else
+                {
+                    labor.TotalLaborPerItem = TimeSpan.Zero;
+                }
+            }
+
+            item.MaterialCost = totalMaterialCost;
+            item.LaborCost = totalLaborCost;
+            item.CostPrice = ItemService.CalculateTotalItemCost(totalMaterialCost, totalLaborCost, item.OfficeExpenses);
+
+            var (retailSelling, retailProfit) = ItemService.CalculateSellingAndProfit(item.CostPrice, item.RetailMargin);
+            item.RetailPrice = retailSelling;
+            item.RetailProfit = retailProfit;
+
+            var (wholSelling, wholProfit) = ItemService.CalculateSellingAndProfit(item.CostPrice, item.WholesaleMargin);
+            item.WholesalePrice = wholSelling;
+            item.WholesaleProfit = wholProfit;
+
+            var (ownMargin, ownProfit) = ItemService.CalculateMarginAndProfit(item.CostPrice, item.OwnPrice);
+            item.OwnMargin = ownMargin;
+            item.OwnProfit = ownProfit;
+        }
+     }
 }
+

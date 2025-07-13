@@ -66,4 +66,39 @@ public class ItemController(ItemService itemService) : ControllerBase
 
         return result;
     }
+
+    [HttpPost("calculate-product")]
+    public async Task<decimal> CalculateProduct([FromBody] IpModel model)
+    {
+        decimal result = await itemService.CalculateProduct(model);
+
+        return result;
+    }
+
+    [HttpPost("calculate-profit")]
+    public async Task<Sp> CalculateProfit([FromBody] MarginInput input)
+    {
+        Console.WriteLine($"margin and cost {input.Cost} {input.Margin}");
+        var (selling, profit) = ItemService.CalculateSellingAndProfit(input.Cost, input.Margin);
+        Console.WriteLine($"selling and profit {selling}{profit}");
+
+        return await Task.FromResult(new Sp
+        {
+            Selling = selling,
+            Profit = profit
+        });
+    }
+
+    [HttpPost("calculate-margin-profit")]
+    public async Task<Pm> CalculateMarginProfit([FromBody] SellingInput input)
+    {
+        var (profit, margin) = ItemService.CalculateMarginAndProfit(input.Cost, input.Selling);
+
+        return await Task.FromResult(new Pm
+        {
+            Profit = profit,
+            Margin = margin
+        });
+    }
+
 }
