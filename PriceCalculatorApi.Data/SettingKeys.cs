@@ -10,5 +10,6 @@ public enum SettingKeys
     Marketing,
     Utilities,
     SoftwareExpenses,
+    Insurance,
     UnitsPerMonth
 }

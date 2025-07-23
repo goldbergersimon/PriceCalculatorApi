@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PriceCalculatorApi.Models;
 using PriceCalculatorApi.Services;
 
 namespace PriceCalculatorApi.Controllers;
 
 [Route("api/[controller]")]
+[Authorize]
 [ApiController]
 public class ProductController(ProductService productService) : ControllerBase
 {

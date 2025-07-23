@@ -81,5 +81,7 @@ public class AutoMapperProfile : Profile
         .ForMember(dest => dest.ItemIngredients, opt => opt.MapFrom(src => src.Ingredients))
         .ForMember(dest => dest.ItemLabors, opt => opt.MapFrom(src => src.Labors))
         .ForMember(dest => dest.ItemProducts, opt => opt.MapFrom(src => src.Products));
+
+        CreateMap<SettingsModel, Settings>();
     }
 }

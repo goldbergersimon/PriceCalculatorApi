@@ -1,12 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PriceCalculatorApi.Models;
 using PriceCalculatorApi.Services;
 
 namespace PriceCalculatorApi.Controllers;
 
 [Route("api/[controller]")]
+[Authorize]
 [ApiController]
-public class ItemController(ItemService itemService) : ControllerBase
+public class ItemController(ItemService itemService, SettingsService settingsService) : ControllerBase
 {
     [HttpGet]
     public async Task<List<ItemListModel>> GetAllItems()
@@ -32,7 +34,7 @@ public class ItemController(ItemService itemService) : ControllerBase
         await itemService.CreateItem(model);
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<ItemListModel>> UpdateProduct(int id, [FromBody] ItemModel model)
+    public async Task<ActionResult<ItemListModel>> UpdateItem(int id, [FromBody] ItemModel model)
     {
         if (id != model.ItemId) return BadRequest();
 
@@ -100,5 +102,9 @@ public class ItemController(ItemService itemService) : ControllerBase
             Margin = margin
         });
     }
+
+    [HttpGet("get-office-expences")]
+    public async Task<decimal> GetOfficeExpences() =>
+          await settingsService.GetOfficeExpenses();
 
 }

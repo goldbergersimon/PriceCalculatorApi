@@ -1,6 +1,9 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using PriceCalculatorApi.Data;
 using PriceCalculatorApi.Services;
+using System.Text;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +19,28 @@ builder.Services.AddCors(options =>
     });
 });
 
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var key = Encoding.UTF8.GetBytes(jwtSettings["key"]);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSettings["Issuer"],
+            ValidAudience = jwtSettings["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(key)
+        };
+    });
+
 
 // Add services to the container.
 
@@ -25,6 +50,8 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+
+
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<PriceCalculatorDbContext>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -34,6 +61,7 @@ builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 builder.Services.AddScoped<IngredientService>();
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<ItemService>();
+builder.Services.AddScoped<SettingsService>();
 
 
 builder.Services.AddEndpointsApiExplorer();
@@ -43,7 +71,7 @@ var app = builder.Build();
 
 app.UseCors("AllowAngularDevClient");
 
-// Configure the HTTP request pipeline.
+//Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -52,6 +80,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
