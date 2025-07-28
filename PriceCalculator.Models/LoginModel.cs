@@ -1,4 +1,6 @@
-﻿namespace PriceCalculatorApi.Models;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace PriceCalculatorApi.Models;
 
 public class LoginModel
 {
