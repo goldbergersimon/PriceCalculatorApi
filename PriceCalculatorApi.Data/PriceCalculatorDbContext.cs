@@ -13,4 +13,5 @@ public class PriceCalculatorDbContext(DbContextOptions<PriceCalculatorDbContext>
     public DbSet<ItemLabor> ItemLabors { get; set; } = null!;
     public DbSet<ItemIngredient> ItemIngredients { get; set; } = null!;
     public DbSet<Settings> Settings { get; set; } = null!;
+    public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PriceCalculatorApi.Data;
 
@@ -11,9 +12,11 @@ using PriceCalculatorApi.Data;
 namespace PriceCalculatorApi.Data.Migrations
 {
     [DbContext(typeof(PriceCalculatorDbContext))]
-    partial class PriceCalculatorDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250731192917_AddRefreshToken2")]
+    partial class AddRefreshToken2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -366,8 +369,8 @@ namespace PriceCalculatorApi.Data.Migrations
 
                     b.Property<string>("Token")
                         .IsRequired()
-                        .HasMaxLength(60)
-                        .HasColumnType("nvarchar(60)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Username")
                         .IsRequired()

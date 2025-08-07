@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using PriceCalculatorApi.Data;
 using PriceCalculatorApi.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -10,12 +12,11 @@ namespace PriceCalculatorApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class LoginController(IConfiguration config) : ControllerBase
+public class LoginController(IConfiguration config, PriceCalculatorDbContext db) : ControllerBase
 {
-    private static Dictionary<string, string> userRefreshToken = [];
 
     [HttpPost("login")]
-    public IActionResult Login([FromBody] LoginModel model)
+    public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
         //var user = AuthenticateUser(model);
         if (model.Username == "admin" && model.Password == "12345")
@@ -23,37 +24,52 @@ public class LoginController(IConfiguration config) : ControllerBase
             var accessToken = GenerateJwtToken(model.Username);
             var refreshToken = GenerateRefreshToken();
 
-            SaveRefreshToken(model.Username, refreshToken);
+            await SaveRefreshToken(model.Username, refreshToken);
 
             return Ok(new { accessToken, refreshToken });
         }
     
-            return Unauthorized();
+            return BadRequest(new {message = "Invalid username or password"});
     }
 
-    private void SaveRefreshToken(string username, string refreshToken) 
+    private async Task SaveRefreshToken(string username, string refreshToken) 
     {
-        userRefreshToken[username] = refreshToken;
+        var existingToken = await db.RefreshTokens.FirstOrDefaultAsync(rt => rt.Username == username);
+        if (existingToken != null)
+        {
+            existingToken.Token = refreshToken;
+        }
+        else
+        {
+            await db.RefreshTokens.AddAsync(new RefreshToken
+            {
+                Username = username,
+                Token = refreshToken
+            });
+        }
+        await db.SaveChangesAsync();
     }
 
     [HttpPost("refresh")]
-    public IActionResult Refresh([FromBody] TokenRefreshRequest model)
+    public async Task<IActionResult> Refresh([FromBody] TokenRefreshRequest model)
     {
         var username = GetUsernameFromExpiredToken(model.AccessToken);
 
-        if (username == null || !ValidateRefreshToken(username, model.RefreshToken))
+        if (username == null || !await ValidateRefreshToken(username, model.RefreshToken))
             return Unauthorized();
 
         var newAccessToken = GenerateJwtToken(username);
         var newRefreshToken = GenerateRefreshToken();
-        SaveRefreshToken(username, newRefreshToken);
+        await SaveRefreshToken(username, newRefreshToken);
 
         return Ok(new { accessToken = newAccessToken, refreshToken = newRefreshToken });
     }
 
-    private bool ValidateRefreshToken(string username, string refreshToken)
+    private async Task<bool> ValidateRefreshToken(string username, string refreshToken)
     {
-        return userRefreshToken.TryGetValue(username, out var storedToken) && storedToken == refreshToken;
+        var storedtoken = await db.RefreshTokens.FirstOrDefaultAsync(rt => rt.Username == username && rt.Token == refreshToken);
+
+        return storedtoken != null;
     }
 
     private string? GetUsernameFromExpiredToken(string token)
@@ -69,7 +85,7 @@ public class LoginController(IConfiguration config) : ControllerBase
                 ValidateLifetime = false,
                 ValidIssuer = jwtSettings["Issuer"],
                 ValidAudience = jwtSettings["Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["key"]))
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["key"]!))
             };
 
             var tokenhandler = new JwtSecurityTokenHandler();
@@ -87,7 +103,7 @@ public class LoginController(IConfiguration config) : ControllerBase
     private string GenerateJwtToken(string username)
     {
         var jwtSettings = config.GetSection("Jwt");
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["key"]));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["key"]!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
