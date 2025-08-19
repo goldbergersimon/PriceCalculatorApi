@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PriceCalculatorApi.Data;
 
@@ -11,9 +12,11 @@ using PriceCalculatorApi.Data;
 namespace PriceCalculatorApi.Data.Migrations
 {
     [DbContext(typeof(PriceCalculatorDbContext))]
-    partial class PriceCalculatorDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250817183030_AddPieces")]
+    partial class AddPieces
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -104,6 +107,9 @@ namespace PriceCalculatorApi.Data.Migrations
                     b.Property<decimal>("OfficeExpenses")
                         .HasColumnType("decimal(6,2)");
 
+                    b.Property<int>("OnwPieces")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("OwnMargin")
                         .HasColumnType("decimal(6,2)");
 
@@ -116,11 +122,17 @@ namespace PriceCalculatorApi.Data.Migrations
                     b.Property<decimal>("RetailMargin")
                         .HasColumnType("decimal(6,2)");
 
+                    b.Property<int>("RetailPieces")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("RetailPrice")
                         .HasColumnType("decimal(6,2)");
 
                     b.Property<decimal>("RetailProfit")
                         .HasColumnType("decimal(6,2)");
+
+                    b.Property<int>("WhledalePieces")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("WholesaleMargin")
                         .HasColumnType("decimal(6,2)");

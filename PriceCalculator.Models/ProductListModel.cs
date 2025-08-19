@@ -49,7 +49,6 @@ public class ProductLaborEditModel
     public int Workers { get; set; }
     public int Yields { get; set; }
     public TimeSpan TotalLaborPerItem { get; set; }
-    public decimal TotalLaborCost { get; set; }
     public int ProductId { get; set; }
 }
 

@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace PriceCalculatorApi.Data;
 
@@ -14,8 +13,6 @@ public class ProductLabor
     [Range(0, 100)]
     public int Yields { get; set; }
     public TimeSpan TotalLaborPerItem { get; set; }
-    [Column(TypeName = "decimal(6,2)")]
-    public decimal TotalLaborCost { get; set; }
     public int ProductId { get; set; }
     public Product Product { get; set; } = null!;
 }

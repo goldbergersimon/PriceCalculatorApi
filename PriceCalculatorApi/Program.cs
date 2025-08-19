@@ -13,7 +13,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularDevClient", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins("http://localhost:4200", "https://proud-plant-0132fa30f.1.azurestaticapps.net")
         .AllowAnyHeader()
         .AllowAnyMethod();
     });
@@ -55,7 +55,7 @@ builder.Services.AddControllers()
 
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<PriceCalculatorDbContext>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+options.UseSqlServer(builder.Configuration.GetConnectionString("DessertPriceDb")));
 
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
@@ -70,7 +70,6 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-app.UseCors("AllowAngularDevClient");
 
 //Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -81,6 +80,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowAngularDevClient");
 
 app.UseAuthentication();
 

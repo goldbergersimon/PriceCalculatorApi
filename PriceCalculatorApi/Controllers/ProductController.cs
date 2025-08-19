@@ -17,16 +17,6 @@ public class ProductController(ProductService productService) : ControllerBase
         return pruducts;
     }
 
-    //[HttpGet("{id}")]
-    //public async Task<ActionResult<ProductListModel>> GetProduct(int id)
-    //{
-    //    var pruduct = await productService.GetProduct(id);
-    //    if (pruduct == null)
-    //        return NotFound();
-
-    //    return pruduct;
-    //}
-
     [HttpGet("{id}")]
     public async Task<ActionResult<ProductModel>> GetProductDetails(int id)
     {

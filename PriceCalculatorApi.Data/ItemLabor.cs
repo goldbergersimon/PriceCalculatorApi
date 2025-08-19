@@ -14,8 +14,6 @@ public class ItemLabor
     [Range(0, 100)]
     public int Yields { get; set; }
     public TimeSpan TotalLaborPerItem { get; set; }
-    [Column(TypeName = "decimal(6,2)")]
-    public decimal TotalLaborCost { get; set; }
 
     public int ItemId { get; set; }
     public Item Item { get; set; } = null!;

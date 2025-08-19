@@ -80,9 +80,7 @@ public class ItemController(ItemService itemService, SettingsService settingsSer
     [HttpPost("calculate-profit")]
     public async Task<Sp> CalculateProfit([FromBody] MarginInput input)
     {
-        Console.WriteLine($"margin and cost {input.Cost} {input.Margin}");
         var (selling, profit) = ItemService.CalculateSellingAndProfit(input.Cost, input.Margin);
-        Console.WriteLine($"selling and profit {selling}{profit}");
 
         return await Task.FromResult(new Sp
         {

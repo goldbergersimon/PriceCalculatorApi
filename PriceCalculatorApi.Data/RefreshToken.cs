@@ -10,5 +10,6 @@ public class RefreshToken
     public string Username { get; set; } = null!;
     [MaxLength(60)]
     public string Token { get; set; } = null!;
+    public string DeviceId { get; set; } = null!;
     public DateTime? ExpireyDate { get; set; }
 }
