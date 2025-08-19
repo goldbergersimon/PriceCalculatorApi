@@ -18,13 +18,14 @@ public class LoginController(IConfiguration config, PriceCalculatorDbContext db)
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
+        string username = model.Username.ToLower();
         //var user = AuthenticateUser(model);
-        if (model.Username == "admin" && model.Password == "sG@2114")
+        if (username == "admin" && model.Password == "pass@123")
         {
-            var accessToken = GenerateJwtToken(model.Username);
+            var accessToken = GenerateJwtToken(username);
             var refreshToken = GenerateRefreshToken();
 
-            await SaveRefreshToken(model.Username, refreshToken, model.DeviceId);
+            await SaveRefreshToken(username, refreshToken, model.DeviceId);
 
             return Ok(new { accessToken, refreshToken });
         }
