@@ -53,10 +53,10 @@ public class IngredientService(PriceCalculatorDbContext db, ProductService produ
         if (ingredient == null)
             return false;
 
-        var hasChild = await db.ProductIngredients.AnyAsync(pi => pi.IngredientId == id);
+        var hasChild = await db.ProductIngredients.AnyAsync(pi => pi.IngredientId == id) || await db.ItemIngredients.AnyAsync(ii => ii.IngredientId == id);
 
         if (hasChild)
-            throw new InvalidOperationException("This ingredient cannot be deleted because it is used in one or more products.");
+            throw new InvalidOperationException("This ingredient cannot be deleted because it is used in one or more recipes or items.");
                 
         db.Ingredients.Remove(ingredient);
         await db.SaveChangesAsync();
