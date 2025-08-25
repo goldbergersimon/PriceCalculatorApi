@@ -27,7 +27,7 @@ public class IngredientController(IngredientService ingredientService) : Control
     }
 
     [HttpPost]
-    public async Task<IngredientModel> CreateIngredient([FromBody] IngredientEditModel model) =>
+    public async Task<IngredientModel?> CreateIngredient([FromBody] IngredientEditModel model) =>
           await ingredientService.AddIngredient(model);
 
 

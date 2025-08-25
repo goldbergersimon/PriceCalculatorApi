@@ -20,7 +20,7 @@ builder.Services.AddCors(options =>
 });
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
-var key = Encoding.UTF8.GetBytes(jwtSettings["key"]);
+var key = Encoding.UTF8.GetBytes(jwtSettings["key"]!);
 
 builder.Services.AddAuthentication(options =>
 {
@@ -55,7 +55,7 @@ builder.Services.AddControllers()
 
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<PriceCalculatorDbContext>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("DessertPriceDb")));
+options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
