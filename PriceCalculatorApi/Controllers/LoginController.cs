@@ -130,6 +130,9 @@ public class LoginController(IConfiguration config, PriceCalculatorDbContext db)
         var randomNumber = new byte[32];
         using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(randomNumber);
-        return Convert.ToBase64String(randomNumber);
+        return Convert.ToBase64String(randomNumber)
+                 .Replace("+", "-")
+                 .Replace("/", "_")
+                 .Replace("=", "");
     }
 }
