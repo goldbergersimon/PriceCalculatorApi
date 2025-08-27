@@ -55,7 +55,7 @@ builder.Services.AddControllers()
 
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<PriceCalculatorDbContext>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("Repricer"),
+options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
 sqlOptions =>
 {
     sqlOptions.EnableRetryOnFailure(
