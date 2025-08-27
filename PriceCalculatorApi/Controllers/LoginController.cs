@@ -12,7 +12,7 @@ namespace PriceCalculatorApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class LoginController(IConfiguration config, PriceCalculatorDbContext db) : ControllerBase
+public class LoginController(IConfiguration config, PriceCalculatorDbContext db, ILogger<LoginController> logger) : ControllerBase
 {
 
     [HttpPost("login")]
@@ -27,22 +27,29 @@ public class LoginController(IConfiguration config, PriceCalculatorDbContext db)
 
             await SaveRefreshToken(username, refreshToken, model.DeviceId);
 
+            logger.LogInformation("User {Username} logged in successfully.", username);
+
             return Ok(new { accessToken, refreshToken });
         }
-    
-            return BadRequest(new {message = "Invalid username or password"});
+
+        logger.LogWarning("Invalid login attempt for user {Username}.", username);
+
+        return BadRequest(new {message = "Invalid username or password"});
     }
 
     private async Task SaveRefreshToken(string username, string refreshToken, string deviceId) 
     {
+        logger.LogDebug("Saving refresh token for {Username} on device {DeviceId}", username, deviceId);
         var existingToken = await db.RefreshTokens.FirstOrDefaultAsync(rt => rt.Username == username && rt.DeviceId == deviceId);
         if (existingToken != null)
         {
+            logger.LogDebug("Updating existing refresh token for {Username} on device {DeviceId}", username, deviceId);
             existingToken.Token = refreshToken;
             existingToken.ExpireyDate = DateTime.UtcNow.AddDays(30);
         }
         else
         {
+            logger.LogDebug("Creating new refresh token for {Username} on device {DeviceId}", username, deviceId);
             await db.RefreshTokens.AddAsync(new RefreshToken
             {
                 Username = username,
@@ -59,14 +66,26 @@ public class LoginController(IConfiguration config, PriceCalculatorDbContext db)
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh([FromBody] TokenRefreshRequest model)
     {
+        logger.LogInformation("Refresh request received for device {DeviceId}", model.DeviceId);
         var username = GetUsernameFromExpiredToken(model.AccessToken);
 
-        if (username == null || !await ValidateRefreshToken(username, model.RefreshToken, model.DeviceId))
+        if (username == null)
+        {
+            logger.LogWarning("Refresh failed: could not extract username from access token for device {DeviceId}", model.DeviceId);
             return Unauthorized();
+        }
+
+        if (!await ValidateRefreshToken(username, model.RefreshToken, model.DeviceId))
+        {
+            logger.LogWarning("Refresh failed: invalid refresh token for user {Username}, device {DeviceId}", username, model.DeviceId);
+            return Unauthorized();
+        }
 
         var newAccessToken = GenerateJwtToken(username);
         var newRefreshToken = GenerateRefreshToken();
         await SaveRefreshToken(username, newRefreshToken, model.DeviceId);
+
+        logger.LogInformation("Refresh successful for user {Username}, device {DeviceId}", username, model.DeviceId);
 
         return Ok(new { accessToken = newAccessToken, refreshToken = newRefreshToken });
     }
@@ -103,8 +122,9 @@ public class LoginController(IConfiguration config, PriceCalculatorDbContext db)
             var username = princepal?.Identity?.Name;
             return username;
         }
-        catch
+        catch (Exception ex) 
         {
+            logger.LogError(ex, "Error validating expired token.");
             return null;
         }
     }
