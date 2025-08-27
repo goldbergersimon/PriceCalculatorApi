@@ -15,6 +15,9 @@ namespace PriceCalculatorApi.Controllers;
 public class LoginController(IConfiguration config, PriceCalculatorDbContext db) : ControllerBase
 {
 
+    [HttpGet]
+    public IActionResult Ping() => Ok("API is alive");
+
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
