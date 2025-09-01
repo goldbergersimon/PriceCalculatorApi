@@ -13,7 +13,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularDevClient", policy =>
     {
-        policy.WithOrigins("http://localhost:4200", "https://proud-plant-0132fa30f.1.azurestaticapps.net", "https://zealous-mud-0545fed0f.2.azurestaticapps.net")
+        policy.WithOrigins("http://localhost:4200", "https://wonderful-glacier-00423ea0f.2.azurestaticapps.net")
         .AllowAnyHeader()
         .AllowAnyMethod();
     });
