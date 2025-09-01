@@ -21,19 +21,26 @@ public class LoginController(IConfiguration config, PriceCalculatorDbContext db)
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
-        string username = model.Username.ToLower();
-        //var user = AuthenticateUser(model);
-        if (username == "admin" && model.Password == "pass@123")
+        try
         {
-            var accessToken = GenerateJwtToken(username);
-            var refreshToken = GenerateRefreshToken();
+            string username = model.Username.ToLower();
+            //var user = AuthenticateUser(model);
+            if (username == "admin" && model.Password == "pass@123")
+            {
+                var accessToken = GenerateJwtToken(username);
+                var refreshToken = GenerateRefreshToken();
 
-            await SaveRefreshToken(username, refreshToken, model.DeviceId);
+                await SaveRefreshToken(username, refreshToken, model.DeviceId);
 
-            return Ok(new { accessToken, refreshToken });
+                return Ok(new { accessToken, refreshToken });
+            }
+
+            return BadRequest(new { message = "Invalid username or password" });
         }
-
-        return BadRequest(new {message = "Invalid username or password"});
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = $"Internal server error{ex}" });
+        }
     }
 
     private async Task SaveRefreshToken(string username, string refreshToken, string deviceId) 
