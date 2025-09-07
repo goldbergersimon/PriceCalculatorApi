@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PriceCalculatorApi.Data;
 
@@ -11,9 +12,11 @@ using PriceCalculatorApi.Data;
 namespace PriceCalculatorApi.Data.Migrations
 {
     [DbContext(typeof(PriceCalculatorDbContext))]
-    partial class PriceCalculatorDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250905183657_AddIncludeOEProp")]
+    partial class AddIncludeOEProp
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -107,9 +110,6 @@ namespace PriceCalculatorApi.Data.Migrations
                     b.Property<decimal>("OfficeExpenses")
                         .HasColumnType("decimal(6,2)");
 
-                    b.Property<decimal>("OwnBox")
-                        .HasColumnType("decimal(6,2)");
-
                     b.Property<decimal>("OwnMargin")
                         .HasColumnType("decimal(6,2)");
 
@@ -119,12 +119,6 @@ namespace PriceCalculatorApi.Data.Migrations
                     b.Property<decimal>("OwnProfit")
                         .HasColumnType("decimal(6,2)");
 
-                    b.Property<int>("PiecesPerBox")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("RetailBox")
-                        .HasColumnType("decimal(6,2)");
-
                     b.Property<decimal>("RetailMargin")
                         .HasColumnType("decimal(6,2)");
 
@@ -132,9 +126,6 @@ namespace PriceCalculatorApi.Data.Migrations
                         .HasColumnType("decimal(6,2)");
 
                     b.Property<decimal>("RetailProfit")
-                        .HasColumnType("decimal(6,2)");
-
-                    b.Property<decimal>("WholesaleBox")
                         .HasColumnType("decimal(6,2)");
 
                     b.Property<decimal>("WholesaleMargin")

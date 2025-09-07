@@ -32,6 +32,12 @@ public class ItemEditModel
     public decimal WholesaleMargin { get; set; }
     public decimal OwnMargin { get; set; }
     public decimal OfficeExpenses { get; set; }
+    public bool IncludeOfficeExpenses { get; set; }
+    public int PiecesPerBox { get; set; }
+    public decimal RetailBox { get; set; }
+    public decimal WholesaleBox { get; set; }
+    public decimal OwnBox { get; set; }
+
 
     public List<ItemProductModel> Products { get; set; } = [];
     public List<ItemLaborModel> Labors { get; set; } = [];

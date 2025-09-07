@@ -11,7 +11,7 @@ public class ItemLabor
     public TimeSpan Duration { get; set; }
     [Range(0, 100)]
     public int Workers { get; set; }
-    [Range(0, 100)]
+    [Range(0, 1000)]
     public int Yields { get; set; }
     public TimeSpan TotalLaborPerItem { get; set; }
 

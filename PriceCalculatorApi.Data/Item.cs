@@ -34,6 +34,15 @@ public class Item
     public decimal OwnMargin { get; set; }
     [Column(TypeName = "decimal(6,2)")]
     public decimal OfficeExpenses { get; set; }
+    public bool IncludeOfficeExpenses { get; set; }
+    [Range(0, 1000)]
+    public int PiecesPerBox { get; set; }
+    [Column(TypeName = "decimal(6,2)")]
+    public decimal RetailBox { get; set; }
+    [Column(TypeName = "decimal(6,2)")]
+    public decimal WholesaleBox { get; set; }
+    [Column(TypeName = "decimal(6,2)")]
+    public decimal OwnBox { get; set; }
 
     public ICollection<ItemProduct> ItemProducts { get; set; } = [];
     public ICollection<ItemLabor> ItemLabors { get; set; } = [];
