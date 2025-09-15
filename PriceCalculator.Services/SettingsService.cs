@@ -69,14 +69,17 @@ public class SettingsService(PriceCalculatorDbContext db, IMapper mapper, ItemSe
             (decimal retailSelling, decimal retailProfit) = ItemService.CalculateSellingAndProfit(item.MaterialCost + item.LaborCost + item.OfficeExpenses, item.RetailMargin);
             item.RetailPrice = retailSelling;
             item.RetailProfit = retailProfit;
+            item.RetailBox = itemService.CalculateBoxPrice(item.PiecesPerBox, item.RetailPrice);
 
             (decimal wholeSelling, decimal wholeProfit) = ItemService.CalculateSellingAndProfit(item.MaterialCost + item.LaborCost + item.OfficeExpenses, item.WholesaleMargin);
             item.WholesalePrice = wholeSelling;
             item.WholesaleProfit = wholeProfit;
+            item.WholesaleBox = itemService.CalculateBoxPrice(item.PiecesPerBox, item.WholesalePrice);
 
             (decimal ownProfit, decimal ownMargin) = ItemService.CalculateMarginAndProfit(item.MaterialCost + item.LaborCost + item.OfficeExpenses, item.OwnPrice);
             item.OwnProfit = ownProfit;
             item.OwnMargin = ownMargin;
+            item.OwnBox = itemService.CalculateBoxPrice(item.PiecesPerBox, item.OwnPrice);
         }
         await db.SaveChangesAsync();
     }
@@ -180,14 +183,17 @@ public class SettingsService(PriceCalculatorDbContext db, IMapper mapper, ItemSe
             var (retailSelling, retailProfit) = ItemService.CalculateSellingAndProfit(item.CostPrice, item.RetailMargin);
             item.RetailPrice = retailSelling;
             item.RetailProfit = retailProfit;
+            item.RetailBox = itemService.CalculateBoxPrice(item.PiecesPerBox, item.RetailPrice);
 
             var (wholSelling, wholProfit) = ItemService.CalculateSellingAndProfit(item.CostPrice, item.WholesaleMargin);
             item.WholesalePrice = wholSelling;
             item.WholesaleProfit = wholProfit;
+            item.WholesaleBox = itemService.CalculateBoxPrice(item.PiecesPerBox, item.WholesalePrice);
 
             var (ownMargin, ownProfit) = ItemService.CalculateMarginAndProfit(item.CostPrice, item.OwnPrice);
             item.OwnMargin = ownMargin;
             item.OwnProfit = ownProfit;
+            item.OwnBox = itemService.CalculateBoxPrice(item.PiecesPerBox, item.OwnPrice);
         }
         await db.SaveChangesAsync();
     }

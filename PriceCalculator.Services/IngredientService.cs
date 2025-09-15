@@ -6,7 +6,7 @@ using PriceCalculatorApi.Models;
 
 namespace PriceCalculatorApi.Services;
 
-public class IngredientService(PriceCalculatorDbContext db, ProductService productService, IMapper mapper)
+public class IngredientService(PriceCalculatorDbContext db, ProductService productService,ItemService itemService, IMapper mapper)
 {
 
     public async Task<List<IngredientModel>> GetIngredientList()
@@ -160,14 +160,17 @@ public class IngredientService(PriceCalculatorDbContext db, ProductService produ
             var (retailSelling, retailProfit) = ItemService.CalculateSellingAndProfit(item.CostPrice, item.RetailMargin);
             item.RetailPrice = retailSelling;
             item.RetailProfit = retailProfit;
+            item.RetailBox = itemService.CalculateBoxPrice(item.PiecesPerBox, item.RetailPrice);
 
             var (wholSelling, wholProfit) = ItemService.CalculateSellingAndProfit(item.CostPrice, item.WholesaleMargin);
             item.WholesalePrice = wholSelling;
             item.WholesaleProfit = wholProfit;
+            item.WholesaleBox = itemService.CalculateBoxPrice(item.PiecesPerBox, item.WholesalePrice);
 
             var (ownMargin, ownProfit) = ItemService.CalculateMarginAndProfit(item.CostPrice, item.OwnPrice);
             item.OwnMargin = ownMargin;
             item.OwnProfit = ownProfit;
+            item.OwnBox = itemService.CalculateBoxPrice(item.PiecesPerBox, item.OwnPrice);
         }
     }
 

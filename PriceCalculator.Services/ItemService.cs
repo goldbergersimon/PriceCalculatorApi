@@ -221,6 +221,12 @@ public class ItemService(PriceCalculatorDbContext db, IMapper mapper)
         return (profit, margin);
     }
 
+    public decimal CalculateBoxPrice(int piecesPerBox, decimal pricePerItem)
+    {
+        if (piecesPerBox <= 0) return 0;
+        return pricePerItem * piecesPerBox;
+    }   
+
     public async Task<decimal> GetHourlyRate()
     {
         if (_cachesHourlyRate.HasValue)

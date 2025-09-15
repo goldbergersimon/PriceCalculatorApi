@@ -84,6 +84,7 @@ public class IiModel
     public decimal Quantity { get; set; }
     public Units Unit { get; set; }
     public int Yields { get; set; }
+    public decimal TotalCostPerItem { get; set; }
 }
 
 public class IpModel
@@ -92,6 +93,7 @@ public class IpModel
     public decimal Quantity { get; set; }
     public ItemUnits Unit { get; set; }
     public int Yields { get; set; }
+    public decimal Total { get; set; }
 }
 
 public class MarginInput
