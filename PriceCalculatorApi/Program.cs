@@ -64,7 +64,7 @@ sqlOptions =>
         errorNumbersToAdd: null);
 }));
 
-builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
+builder.Services.AddAutoMapper(cfg => {}, typeof(AutoMapperProfile));
 
 builder.Services.AddScoped<IngredientService>();
 builder.Services.AddScoped<ProductService>();
@@ -84,8 +84,8 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseDeveloperExceptionPage();
 }
-app.UseDeveloperExceptionPage();
 
 app.UseHttpsRedirection();
 

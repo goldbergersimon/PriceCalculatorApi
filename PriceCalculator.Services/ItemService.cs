@@ -158,46 +158,46 @@ public class ItemService(PriceCalculatorDbContext db, IMapper mapper)
         };
     }
 
-    public static decimal CalculateTotalMaterialCost(IEnumerable<ItemProduct> products)
-    {
-        decimal totaMaterialCost = 0;
+    //public static decimal CalculateTotalMaterialCost(IEnumerable<ItemProduct> products)
+    //{
+    //    decimal totaMaterialCost = 0;
 
-        foreach (var product in products)
-        {
-            totaMaterialCost += product.Total;
-        }
-        return totaMaterialCost;
-    }
+    //    foreach (var product in products)
+    //    {
+    //        totaMaterialCost += product.Total;
+    //    }
+    //    return totaMaterialCost;
+    //}
 
-    public static void CalculateTimePerItem(IEnumerable<ItemLabor> labors)
-    {
-        foreach (var labor in labors)
-        {
-            if (labor.Yields > 0)
-            {
-                labor.TotalLaborPerItem = TimeSpan.FromTicks(labor.Duration.Ticks / labor.Yields);
-            }
-            else
-            {
-                labor.TotalLaborPerItem = TimeSpan.Zero;
-            }
-        }
-    }
+    //public static void CalculateTimePerItem(IEnumerable<ItemLabor> labors)
+    //{
+    //    foreach (var labor in labors)
+    //    {
+    //        if (labor.Yields > 0)
+    //        {
+    //            labor.TotalLaborPerItem = TimeSpan.FromTicks(labor.Duration.Ticks / labor.Yields);
+    //        }
+    //        else
+    //        {
+    //            labor.TotalLaborPerItem = TimeSpan.Zero;
+    //        }
+    //    }
+    //}
 
-    public static decimal CalculateTotalLaborCost(IEnumerable<ItemLabor> labors, decimal hourlyRate)
-    {
-        decimal totalLaborCost = 0;
+    //public static decimal CalculateTotalLaborCost(IEnumerable<ItemLabor> labors, decimal hourlyRate)
+    //{
+    //    decimal totalLaborCost = 0;
 
-        foreach (var labor in labors)
-        {
-            if (labor.Workers > 0)
-            {
-                decimal cost = (decimal)labor.TotalLaborPerItem.TotalHours * hourlyRate * labor.Workers;
-                totalLaborCost += cost;
-            }
-        }
-        return totalLaborCost;
-    }
+    //    foreach (var labor in labors)
+    //    {
+    //        if (labor.Workers > 0)
+    //        {
+    //            decimal cost = (decimal)labor.TotalLaborPerItem.TotalHours * hourlyRate * labor.Workers;
+    //            totalLaborCost += cost;
+    //        }
+    //    }
+    //    return totalLaborCost;
+    //}
 
 
     public static decimal CalculateTotalItemCost(decimal materialCost, decimal laborCost, decimal officecost)
@@ -227,19 +227,19 @@ public class ItemService(PriceCalculatorDbContext db, IMapper mapper)
         return pricePerItem * piecesPerBox;
     }   
 
-    public async Task<decimal> GetHourlyRate()
-    {
-        if (_cachesHourlyRate.HasValue)
-            return _cachesHourlyRate.Value;
+    //public async Task<decimal> GetHourlyRate()
+    //{
+    //    if (_cachesHourlyRate.HasValue)
+    //        return _cachesHourlyRate.Value;
 
-        var setting = await db.Settings.FirstOrDefaultAsync(s => s.Key == SettingKeys.HourlyRate);
-        if (setting != null && decimal.TryParse(setting.Value, out decimal rate))
-        {
-            _cachesHourlyRate = rate;
-            return rate;
-        }
+    //    var setting = await db.Settings.FirstOrDefaultAsync(s => s.Key == SettingKeys.HourlyRate);
+    //    if (setting != null && decimal.TryParse(setting.Value, out decimal rate))
+    //    {
+    //        _cachesHourlyRate = rate;
+    //        return rate;
+    //    }
 
-        _cachesHourlyRate = 0;
-        return 0;
-    }
+    //    _cachesHourlyRate = 0;
+    //    return 0;
+    //}
 }
